@@ -2,10 +2,14 @@ package com.breakoutgdx.game;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Table.Debug;
+
 import java.util.*;
 
 public class BreakoutGame implements Screen{
@@ -16,20 +20,23 @@ public class BreakoutGame implements Screen{
     Body ballBody, wallBody, floorBody, paddleBody;
     HashMap bricks;
     final int scale = 32;
+    int score = 0;
+    SpriteBatch batch;
+    private String scoreString;
+    BitmapFont scoreFont;
 
     public void show() {
         stage = new Stage();
         bricks = new HashMap();
-
+        batch = new SpriteBatch();
         Texture ballTexture = new Texture("ball.png");
         Texture pedalTexture = new Texture("pedal.png");
         Texture brickTexture = new Texture("block2.png");
-        
+        scoreFont = new BitmapFont();
         ball = new Image(ballTexture);
         stage.addActor(ball);
         paddle = new Image(pedalTexture);
         stage.addActor(paddle);
-
         final float screenWidth = Gdx.graphics.getWidth();
         final float screenHeight = Gdx.graphics.getHeight();
         
@@ -83,6 +90,7 @@ public class BreakoutGame implements Screen{
                 if (i != null) {
                     i.remove();
                 } else if (b == floorBody) {
+                	score = 0;
                     show();
                 }
             }
@@ -95,8 +103,14 @@ public class BreakoutGame implements Screen{
     public void render(float delta) {
        Gdx.gl.glClearColor((float)244/255, (float)250/255, (float)121/255,1);
        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        world.step(delta, 10, 10);
+       scoreString = "Score: " + score;
+      
+       scoreFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+      // scoreFont.
+       batch.begin();
+       scoreFont.draw(batch,scoreString, 25, 50);
+       batch.end(); 
+       world.step(delta, 10, 10);
         paddle.setPosition(paddleBody.getPosition().x*scale, paddleBody.getPosition().y*scale);
         ball.setPosition(ballBody.getPosition().x*scale, ballBody.getPosition().y*scale);
 
@@ -106,6 +120,7 @@ public class BreakoutGame implements Screen{
             Image i = (Image) bricks.get(b);
             if (i.hasParent() == false) {
                 world.destroyBody(b);
+                score +=5;
                 iter.remove();
             }
         }
